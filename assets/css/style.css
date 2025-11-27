@@ -1,0 +1,7 @@
+body { padding-bottom: 0; }
+.bg-primary { background-color: #0d6efd !important; }
+.navbar-brand { font-size: 1.5rem; }
+.owl-carousel .item img { height: 400px; object-fit: cover; }
+.card-course img { height: 200px; object-fit: cover; }
+.btn-buy { background: #ff6b35; color: white; }
+.btn-buy:hover { background: #e55a2b; color: white; }
