@@ -71,7 +71,7 @@ require_once dirname(__DIR__, 2) . '/includes/header.php';
 
                 <hr>
                 <div class="text-center">
-                    <p class="mb-2">Admin test: <strong>admin@gmail.com</strong> / <strong>password</strong></p>
+                    
                     <a href="register.php" class="text-decoration-none">Chưa có tài khoản? Đăng ký</a>
                 </div>
             </div>

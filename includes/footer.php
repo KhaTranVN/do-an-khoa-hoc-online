@@ -1,32 +1,44 @@
-</div><!-- end .container -->
+</div> <!-- .main-content -->
 
-<footer class="bg-dark text-white mt-5 py-5">
+<!-- Footer -->
+<footer class="bg-dark text-white py-5 mt-5">
     <div class="container">
         <div class="row">
-            <div class="col-md-4">
-                <h5><i class="fas fa-graduation-cap"></i> KHÓA HỌC ONLINE</h5>
-                <p>Học mọi lúc – mọi nơi – giá siêu hời!</p>
+            <div class="col-lg-4">
+                <h5><i class="fas fa-graduation-cap text-warning"></i> KHÓA HỌC ONLINE PRO</h5>
+                <p>Học lập trình – Thiết kế – Marketing online cùng giảng viên hàng đầu Việt Nam!</p>
             </div>
-            <div class="col-md-4">
-                <h5>Liên kết</h5>
+            <div class="col-lg-4">
+                <h5>Liên kết nhanh</h5>
                 <ul class="list-unstyled">
-                    <li><a href="#" class="text-white">Giới thiệu</a></li>
-                    <li><a href="#" class="text-white">Chính sách</a></li>
+                    <li><a href="<?= $base_url ?>/" class="text-white">Trang chủ</a></li>
+                    <li><a href="<?= $base_url ?>/modules/courses" class="text-white">Khóa học</a></li>
+                    <li><a href="<?= $base_url ?>/modules/news" class="text-white">Tin tức</a></li>
                 </ul>
             </div>
-            <div class="col-md-4">
+            <div class="col-lg-4">
                 <h5>Liên hệ</h5>
-                <p><i class="fas fa-envelope"></i> support@khoahoconline.vn</p>
+                <p><i class="fas fa-envelope"></i> support@khoahoconline.pro</p>
+                <p><i class="fas fa-phone"></i> 1900 1234</p>
             </div>
         </div>
         <hr>
-        <p class="text-center mb-0">&copy; <?= date('Y') ?> Đồ án tốt nghiệp - [Họ tên + MSSV]</p>
+        <div class="text-center">
+            <p>&copy; <?= date('Y') ?> Khóa Học Online Pro Made By Kha Trần. All rights reserved.</p>
+        </div>
     </div>
 </footer>
 
-<script src="assets/vendor/jquery/jquery-3.7.1.min.js"></script>
-<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-<script src="assets/vendor/owlcarousel/owl.carousel.min.js"></script>
-<script src="assets/js/main.js"></script>
+<!-- Bootstrap Bundle JS (bao gồm Popper) – BẮT BUỘC ĐỂ MENU MỞ ĐƯỢC -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- jQuery (nếu cần) -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<!-- Custom JS (nếu có) -->
+<?php if(file_exists(__DIR__ . '/assets/js/custom.js')): ?>
+    <script src="<?= $base_url ?>/assets/js/custom.js"></script>
+<?php endif; ?>
+
 </body>
 </html>

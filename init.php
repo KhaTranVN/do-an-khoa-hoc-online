@@ -1,11 +1,19 @@
 <?php
-// File init.php – đặt ở thư mục gốc dự án
-session_status() === PHP_SESSION_NONE && session_start();
+// File: D:\do-an-khoa-học-online\init.php
+// BẮT BUỘC PHẢI CÓ FILE NÀY Ở GỐC!!!
 
-// Định nghĩa đường dẫn tuyệta tuyệt đối 1 lần duy nhất
-define('BASE_PATH', __DIR__);
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
-// Include các file quan trọng với đường dẫn tuyệt đối
-require_once BASE_PATH . '/config/database.php';
-require_once BASE_PATH . '/includes/functions.php';
+define('ROOT_PATH', __DIR__);
+
+// Kết nối CSDL + functions
+require_once ROOT_PATH . '/config/database.php';
+require_once ROOT_PATH . '/includes/functions.php';
+
+// Tự động load tất cả class trong thư mục classes
+foreach (glob(ROOT_PATH . '/classes/*.php') as $file) {
+    require_once $file;
+}
 ?>
