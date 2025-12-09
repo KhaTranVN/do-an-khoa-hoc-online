@@ -1,113 +1,76 @@
 <?php
+// File: index.php (gốc project) – SIÊU ROUTER TÍCH HỢP, KHÔNG CẦN FILE ROUTER.PHP NỮA!!!
 session_start();
 require_once 'init.php';
 
-// Đường dẫn gốc
-$base_url = "http://localhost:3000";
+// === TỰ ĐỘNG LẤY BASE_URL – CHẠY NGON MỌI NƠI (LOCAL, VERCEL, HOSTING) ===
+$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || 
+             $_SERVER['SERVER_PORT'] == 443 || 
+             (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https')
+             ? "https://" : "http://";
 
-// Lấy URL hiện tại và xử lý
-$request = $_SERVER['REQUEST_URI'];
-$script_name = $_SERVER['SCRIPT_NAME'];
-$script_dir = dirname($script_name);
-$request = str_replace($script_dir, '', $request);
-$request = parse_url($request, PHP_URL_PATH);
+$base_url = $protocol . $_SERVER['HTTP_HOST'];
+define('BASE_URL', $base_url);
+
+// === LẤY ĐƯỜNG DẪN HIỆN TẠI ===
+$request_uri = $_SERVER['REQUEST_URI'] ?? '/';
+$request = parse_url($request_uri, PHP_URL_PATH);
 $request = ltrim($request, '/');
-$parts = explode('/', $request);
+$request = $request === '' ? 'home' : $request;
 
-// === TỰ ĐỘNG ĐƯA ADMIN VÀO TRANG QUẢN TRỊ SAU KHI ĐĂNG NHẬP ===
-if (is_logged_in() && is_admin() && !strpos($request, 'admin') === 0 && $request !== 'auth/logout') {
-    // Nếu là admin mà đang ở trang user hoặc trang chủ → đưa thẳng vào admin
-    header("Location: $base_url/admin");
+// === TỰ ĐỘNG CHUYỂN ADMIN VÀO DASHBOARD ===
+if (is_logged_in() && is_admin() && !str_starts_with($request, 'admin') && $request !== 'auth/logout') {
+    header("Location: " . BASE_URL . "/admin");
     exit();
 }
 
-// === ROUTING SIÊU THÔNG MINH ===
+// === SIÊU ROUTER THÔNG MINH – CHỈ 1 FILE DUY NHẤT ===
 switch (true) {
 
-    // Trang chủ
-    case $request === '' || $request === 'index.php' || $request === '/':
+    case $request === '' || $request === 'home' || $request === 'index.php':
         require 'modules/home/index.php';
-        exit();
+        break;
 
-    // === ADMIN – CHỈ ADMIN MỚI VÀO ĐƯỢC ===
-    case strpos($request, 'admin') === 0:
+    case str_starts_with($request, 'admin'):
         if (!is_logged_in() || !is_admin()) {
-            $_SESSION['error'] = "Bạn không có quyền truy cập khu vực quản trị!";
-            header("Location: $base_url/auth/login");
+            $_SESSION['toast'] = ['type' => 'error', 'title' => 'Lỗi', 'message' => 'Bạn không có quyền truy cập khu vực này!'];
+            header("Location: " . BASE_URL . "/auth/login");
             exit();
         }
-        $path = 'admin/' . ltrim(str_replace('admin', '', $request), '/');
-        $file = rtrim($path, '/') . '.php';
-        if (file_exists($file)) {
-            require $file;
+        $file = 'admin/' . substr($request, 6);
+        $file = $file === 'admin/' ? 'admin/dashboard.php' : 'admin/' . rtrim($file, '/') . '.php';
+        require file_exists($file) ? $file : 'admin/dashboard.php';
+        break;
+
+    case str_starts_with($request, 'courses'):
+        if ($request === 'courses' || $request === 'courses/') {
+            require 'modules/courses/index.php';
+        } elseif (preg_match('#^courses/detail/(\d+)$#', $request, $m)) {
+            $_GET['id'] = $m[1];
+            require 'modules/courses/detail.php';
+        }
+        break;
+
+    case str_starts_with($request, 'auth/'):
+        $auth_file = 'modules/' . $request . '.php';
+        if (file_exists($auth_file)) {
+            require $auth_file;
         } else {
-            require 'admin/dashboard.php';
+            $_SESSION['toast'] = ['type' => 'error', 'title' => 'Lỗi', 'message' => 'Trang không tồn tại!'];
+            require 'modules/home/index.php';
         }
-        exit();
+        break;
 
-    // === USER (kể cả admin cũng dùng được) ===
-    case in_array($request, ['user/profile', 'user/edit', 'user/orders', 'user/my-courses']):
-        if (!is_logged_in()) {
-            $_SESSION['error'] = "Vui lòng đăng nhập!";
-            header("Location: $base_url/auth/login");
-            exit();
-        }
-        $file = 'modules/user/' . substr($request, 5) . '.php';
-        require file_exists($file) ? $file : 'modules/user/profile.php';
-        exit();
-
-    case preg_match('/^user\/course-detail\/(\d+)$/', $request, $m):
-        if (!is_logged_in()) {
-            header("Location: $base_url/auth/login");
-            exit();
-        }
-        $_GET['id'] = $m[1];
-        require 'modules/user/course_detail.php';
-        exit();
-
-    // === KHÓA HỌC ===
-    case $request === 'courses' || $request === 'courses/':
-        require 'modules/courses/index.php';
-        exit();
-    case preg_match('/^courses\/detail\/(\d+)$/', $request, $m):
-        $_GET['id'] = $m[1];
-        require 'modules/courses/detail.php';
-        exit();
-
-    // === TIN TỨC ===
-    case $request === 'news' || $request === 'news/':
-        require 'modules/news/index.php';
-        exit();
-    case preg_match('/^news\/detail\/(\d+)$/', $request, $m):
-        $_GET['id'] = $m[1];
-        require 'modules/news/detail.php';
-        exit();
-
-    // === GIỎ HÀNG & THANH TOÁN ===
     case $request === 'cart' || $request === 'cart/':
         require 'cart/index.php';
-        exit();
+        break;
+
     case $request === 'checkout':
         require 'modules/checkout/index.php';
-        exit();
-    case $request === 'checkout/success':
-        require 'modules/checkout/success.php';
-        exit();
+        break;
 
-    // === AUTH ===
-    case in_array($request, ['auth/login', 'auth/register', 'auth/logout', 'auth/google-callback']):
-        require ($request === 'auth/google-callback' ? '' : 'modules/') . $request . '.php';
-        exit();
-
-    // === XỬ LÝ GIỎ HÀNG ===
-    case preg_match('/^modules\/cart\/(add|remove|update)\.php$/', $_SERVER['REQUEST_URI']):
-        $file = 'modules/cart/' . basename($_SERVER['REQUEST_URI']);
-        if (file_exists($file)) require $file;
-        exit();
-
-    // Trang không tồn tại
     default:
         http_response_code(404);
-        require 'modules/home/index.php';
-        exit();
+        require 'modules/home/index.php'; // hoặc tạo file 404.php đẹp
+        break;
 }
